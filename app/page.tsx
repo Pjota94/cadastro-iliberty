@@ -11,7 +11,7 @@ interface User {
   id: string;
   name: string;
   email: string;
-  age: number;
+  idade: number;
   created_at?: string;
 }
 
@@ -19,7 +19,7 @@ export default function UserRegistration() {
   const [users, setUsers] = useState<User[]>([]);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [age, setAge] = useState("");
+  const [idade, setIdade] = useState("");
   const [loading, setLoading] = useState(true);
   const [formLoading, setFormLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -76,7 +76,7 @@ export default function UserRegistration() {
       setFormLoading(true);
       const { data, error } = await supabase
         .from("users")
-        .insert([{ name, email, age }])
+        .insert([{ name, email, idade }])
         .select();
 
       if (error) throw error;
@@ -157,8 +157,8 @@ export default function UserRegistration() {
                 <Input
                   type="number"
                   placeholder="Idade"
-                  value={age}
-                  onChange={(e) => setAge(e.target.value)}
+                  value={idade}
+                  onChange={(e) => setIdade(e.target.value)}
                   required
                   className="border-liberty-blue/20 focus:border-liberty-turquoise focus:ring-liberty-turquoise"
                   disabled={formLoading}
@@ -192,7 +192,7 @@ export default function UserRegistration() {
                   >
                     <div>
                       <strong className="text-liberty-blue">{user.name}</strong>{" "}
-                      - {user.email} - {user.age}
+                      - {user.email} - {user.idade}
                     </div>
                     <Button
                       variant="destructive"
