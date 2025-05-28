@@ -1,113 +1,116 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import Image from "next/image"
-import { supabase } from "@/lib/supabaseClient"
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Image from "next/image";
+import { supabase } from "@/lib/supabaseClient";
 
 interface User {
-  id: string
-  name: string
-  email: string
-  created_at?: string
+  id: string;
+  name: string;
+  email: string;
+  age: number;
+  created_at?: string;
 }
 
 export default function UserRegistration() {
-  const [users, setUsers] = useState<User[]>([])
-  const [name, setName] = useState("")
-  const [email, setEmail] = useState("")
-  const [loading, setLoading] = useState(true)
-  const [formLoading, setFormLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [users, setUsers] = useState<User[]>([]);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [age, setAge] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [formLoading, setFormLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Carrega os usuários do Supabase
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        setLoading(true)
+        setLoading(true);
         const { data, error } = await supabase
-          .from('users')
-          .select('*')
-          .order('created_at', { ascending: false })
+          .from("users")
+          .select("*")
+          .order("created_at", { ascending: false });
 
-        if (error) throw error
+        if (error) throw error;
 
-        setUsers(data || [])
+        setUsers(data || []);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Erro ao carregar usuários')
-        console.error(err)
+        setError(
+          err instanceof Error ? err.message : "Erro ao carregar usuários"
+        );
+        console.error(err);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchUsers()
+    fetchUsers();
 
     // Configura subscription para atualizações em tempo real
     const channel = supabase
-      .channel('realtime-users')
+      .channel("realtime-users")
       .on(
-        'postgres_changes',
-        { 
-          event: '*',
-          schema: 'public', 
-          table: 'users' 
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "users",
         },
         () => fetchUsers()
       )
-      .subscribe()
+      .subscribe();
 
     return () => {
-      supabase.removeChannel(channel)
-    }
-  }, [])
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!name || !email) return
+    e.preventDefault();
+    if (!name || !email) return;
 
     try {
-      setFormLoading(true)
+      setFormLoading(true);
       const { data, error } = await supabase
-        .from('users')
-        .insert([{ name, email }])
-        .select()
+        .from("users")
+        .insert([{ name, email, age }])
+        .select();
 
-      if (error) throw error
+      if (error) throw error;
 
-      setName("")
-      setEmail("")
-      setError(null)
+      setName("");
+      setEmail("");
+      setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao cadastrar usuário')
-      console.error(err)
+      setError(
+        err instanceof Error ? err.message : "Erro ao cadastrar usuário"
+      );
+      console.error(err);
     } finally {
-      setFormLoading(false)
+      setFormLoading(false);
     }
-  }
+  };
 
   const handleDelete = async (userId: string) => {
     try {
-      setLoading(true)
-      const { error } = await supabase
-        .from('users')
-        .delete()
-        .eq('id', userId)
+      setLoading(true);
+      const { error } = await supabase.from("users").delete().eq("id", userId);
 
-      if (error) throw error
+      if (error) throw error;
 
       // Atualiza o estado local removendo o usuário deletado
-      setUsers(users.filter(user => user.id !== userId))
-      setError(null)
+      setUsers(users.filter((user) => user.id !== userId));
+      setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao excluir usuário')
-      console.error(err)
+      setError(err instanceof Error ? err.message : "Erro ao excluir usuário");
+      console.error(err);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -150,12 +153,23 @@ export default function UserRegistration() {
                   disabled={formLoading}
                 />
               </div>
-              <Button 
-                type="submit" 
+              <div>
+                <Input
+                  type="number"
+                  placeholder="Idade"
+                  value={age}
+                  onChange={(e) => setAge(e.target.value)}
+                  required
+                  className="border-liberty-blue/20 focus:border-liberty-turquoise focus:ring-liberty-turquoise"
+                  disabled={formLoading}
+                />
+              </div>
+              <Button
+                type="submit"
                 className="bg-liberty-turquoise hover:bg-liberty-turquoise/90 text-white"
                 disabled={formLoading}
               >
-                {formLoading ? 'Cadastrando...' : 'Cadastrar'}
+                {formLoading ? "Cadastrando..." : "Cadastrar"}
               </Button>
               {error && <p className="text-red-500 text-sm">{error}</p>}
             </form>
@@ -177,7 +191,8 @@ export default function UserRegistration() {
                     className="flex justify-between items-center bg-gray-50 p-3 rounded border border-liberty-blue/10 hover:border-liberty-turquoise/30 transition-colors"
                   >
                     <div>
-                      <strong className="text-liberty-blue">{user.name}</strong> - {user.email}
+                      <strong className="text-liberty-blue">{user.name}</strong>{" "}
+                      - {user.email} - {user.age}
                     </div>
                     <Button
                       variant="destructive"
@@ -197,5 +212,5 @@ export default function UserRegistration() {
         </Card>
       </div>
     </div>
-  )
+  );
 }
