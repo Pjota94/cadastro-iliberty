@@ -70,7 +70,7 @@ export default function UserRegistration() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !email) return;
+    if (!name || !email || !idade) return;
 
     try {
       setFormLoading(true);
@@ -83,6 +83,7 @@ export default function UserRegistration() {
 
       setName("");
       setEmail("");
+      setIdade("");
       setError(null);
     } catch (err) {
       setError(
